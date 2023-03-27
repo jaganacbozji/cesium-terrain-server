@@ -4,6 +4,7 @@ const fsp = require('fs').promises
 const path = require('path')
 
 const baseDir = `${__dirname}/terrain`
+const port = process.env.PORT || 8084
 
 const app = express()
 app.use(cors())
@@ -26,7 +27,7 @@ app.get('/', async (req, res) => {
     const viewer = new Cesium.Viewer("cesiumContainer", {
     requestRenderMode : true,
     terrainProvider : new Cesium.CesiumTerrainProvider({
-      url : 'http://localhost:8084/${dirent.name}?v=' + rand,
+      url : 'http://localhost:${port}/${dirent.name}?v=' + rand,
       requestVertexNormals : true
     }),
     shadows: true,
@@ -71,6 +72,5 @@ app.get('/:path(*)', async (req, res) => {
   }
 });
 
-var port = process.env.PORT || 8084
 app.listen(port)
 console.log(`Terrain server running on http://localhost:${port}`)
