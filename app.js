@@ -56,19 +56,23 @@ app.get('/favicon.ico', (req, res) => {
   res.status(404).send()
 })
 
-app.get('/:path(*)', async (req, res) => {
+app.get('/:path(*)', async (req, res, next) => {
   const filename = (`${baseDir}/${req.params.path}`.replaceAll('/', path.sep))
-  if (await readMagic(filename, [0x1f, 0x8b])) {
-    // is gzipped already
-    const buffer = await fsp.readFile(filename)
-    res.set({
-      'Content-Length': buffer.length,
-      'Content-Type': 'application/octet-stream',
-      'Content-Encoding': 'gzip',
-    })
-    res.status(200).send(buffer)
-  } else {
-    res.sendFile(filename)
+  try {
+    if (await readMagic(filename, [0x1f, 0x8b])) {
+      // is gzipped already
+      const buffer = await fsp.readFile(filename)
+      res.set({
+        'Content-Length': buffer.length,
+        'Content-Type': 'application/octet-stream',
+        'Content-Encoding': 'gzip',
+      })
+      res.status(200).send(buffer)
+    } else {
+      res.sendFile(filename)
+    }
+  } catch (e) {
+    next(e)
   }
 });
 
